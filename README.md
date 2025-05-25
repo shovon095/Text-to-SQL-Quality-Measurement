@@ -166,10 +166,6 @@ python updated_gpt_request.py \
 
 ---
 
-## 📄 License
-
-Released under the **MIT License**.  
-See [`LICENSE`](LICENSE) for terms.
 
 ---
 
