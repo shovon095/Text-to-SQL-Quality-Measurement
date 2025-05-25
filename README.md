@@ -1,4 +1,4 @@
-# Text-to-SQL Quality-Check 📊
+# Text-to-SQL Quality-Measurement
 
 > **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
 
@@ -9,7 +9,7 @@
 
 ---
 
-## ✨ Core Features
+##  Core Features
 
 - Difficulty-aware prompts (simple / moderate / complex)  
 - Dual grading – **string similarity** *and* **semantic (result-set) equivalence**  
@@ -179,7 +179,3 @@ python updated_gpt_request.py \
       url={https://arxiv.org/abs/2410.01869}, 
 }
 ```
-
----
-
-**Happy querying!** 🎉
