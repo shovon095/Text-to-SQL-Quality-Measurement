@@ -32,10 +32,9 @@ python -m pip install "torch>=2.1" "transformers>=4.52.3" peft bitsandbytes
 
 # ——— OpenAI workflow ———
 python -m pip install openai backoff
-2 Dataset & Folder Layout
-php-template
-Copy
-Edit
+
+
+## 2 Dataset & Folder Layout
 repo/
 ├── data/
 │   ├── train.json
@@ -44,11 +43,9 @@ repo/
 │       └── <db_id>/<db_id>.sqlite
 ├── llama_quality_check.py
 └── updated_gpt_request.py
-JSON record (example)
 
-jsonc
-Copy
-Edit
+# JSON record (example)
+
 {
   "db_id": "concert_singer",
   "question": "How many singers are from USA?",
@@ -56,11 +53,8 @@ Edit
   "evidence": "nation column stores the country",
   "difficulty": "simple"
 }
-3 llama_quality_check.py — Open-weights pipeline
-3.1 Command-line quick-start
-bash
-Copy
-Edit
+## 3 llama_quality_check.py — Open-weights pipeline
+#3.1 Command-line quick-start
 python llama_quality_check.py \
   --do_train \
   --train_path   data/train.json \
@@ -70,7 +64,7 @@ python llama_quality_check.py \
   --output_dir   checkpoints/llama_ft \
   --batch_size   2 \
   --run_ablation
-3.2 Key arguments
+#3.2 Key arguments
 Flag	Default	Meaning
 --do_train / --do_eval	None	Enable training or inference only
 --engine	Llama-2-7b	Any HF causal-LM checkpoint
@@ -80,7 +74,7 @@ Flag	Default	Meaning
 --max_length	2048	Truncate prompt + generation to this many tokens
 --exec_timeout	20 s	Seconds before SQLite execution is killed
 
-3.3 Outputs
+#3.3 Outputs
 preds.json – generated SQL per question
 
 ablation.png – bar chart of mean similarity for three variants
@@ -89,11 +83,8 @@ loft_logs/ – structured logs for each refinement attempt
 
 checkpoints/llama_ft/ – PEFT model & tokenizer (if --do_train)
 
-4 updated_gpt_request.py — OpenAI pipeline
-4.1 Command-line quick-start
-bash
-Copy
-Edit
+## 4 updated_gpt_request.py — OpenAI pipeline
+#4.1 Command-line quick-start
 export OPENAI_API_KEY="sk-···"
 
 python updated_gpt_request.py \
@@ -103,8 +94,9 @@ python updated_gpt_request.py \
   --data_output_path preds/predict_dev.json \
   --use_knowledge True \
   --chain_of_thought True
-4.2 Important arguments
-Flag	Purpose
+
+#4.2 Important arguments
+
 --mode (dev / test)	Select split processed
 --engine	Any Chat/Completion model (e.g. gpt-4o-mini)
 --use_knowledge	Append evidence to the prompt
@@ -113,19 +105,18 @@ Flag	Purpose
 --backoff_seconds	Start value for exponential back-off on rate-limit
 --resultset_tolerance	Allowed row-order / float diff for semantic match
 
-4.3 Outputs
+#4.3 Outputs
 predict_<split>([_cot]).json – best SQL per question (+ COT if kept)
 
 feedback_results.txt – human-readable trace of each attempt
 
 rate_limit.log – timestamps of any 429 or 5xx retries
 
-5 Choosing the right script
-You need…	Use this script	Why?
+## 5 Choosing the right script
 Keep data on-prem, fine-tune open model	llama_quality_check.py	LoRA + 8-bit, no external API calls
 Rapid results, no GPU, frontier model quality	updated_gpt_request.py	Minimal dependencies, GPT-4(/4o) accuracy
 
-6 Troubleshooting
+## 6 Troubleshooting
 CUDA / torch.bmm device mix – the Llama script monkey-patches common HF quirks.
 
 OpenAI rate limits – automatic exponential back-off; tune --backoff_seconds.
@@ -134,7 +125,7 @@ Long prompts / OOM – lower --max_length or omit --use_knowledge.
 
 Incorrect DB path – check that data/databases/<db_id>/<db_id>.sqlite exists.
 
-7 Contributing
+## 7 Contributing
 Fork ➜ new branch ➜ PR.
 
 Run pre-commit run --all-files (black + isort).
@@ -146,9 +137,6 @@ Released under the MIT License.
 See LICENSE for details.
 
 ✏️ Citation
-pgsql
-Copy
-Edit
 S. Sarker et al., “Enhancing LLM Fine-Tuning for Text-to-SQL by SQL Quality
 Measurement,” manuscript under review, 2025.
 Happy querying 🎉
