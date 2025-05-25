@@ -1,40 +1,39 @@
 # Text-to-SQL Quality-Check 📊
 
-> **Two complementary pipelines** for converting natural-language
-> questions to SQL, grading the output (string **and** semantic similarity),
-> and self-refining the query until a quality threshold is reached.
+> **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
 
-| Script                              | Model family                         | Typical scenario                                       |
-|-------------------------------------|--------------------------------------|--------------------------------------------------------|
-| `llama_quality_check.py`            | **Open-weights LLama-2 / HF causal-LM** | On-prem GPU fine-tuning with LoRA + 8-bit quantisation |
-| `updated_gpt_request.py`            | **OpenAI GPT-3.5 / GPT-4 / GPT-4o**  | Rapid prototyping via OpenAI API (no GPU required)     |
+| Script                    | Model family                           | Typical scenario                                       |
+|---------------------------|----------------------------------------|--------------------------------------------------------|
+| `llama_quality_check.py`  | **Open-weights LLaMA-2 / HF causal-LM**| On-prem GPU fine-tuning with LoRA + 8-bit quantization |
+| `updated_gpt_request.py`  | **OpenAI GPT-3.5 / GPT-4 / GPT-4o**    | Rapid prototyping via OpenAI API (no GPU required)     |
 
 ---
 
-## ✨ Core Features (both scripts)
+## ✨ Core Features
 
-* Difficulty-aware prompts (simple / moderate / complex)  
-* Dual grading – **string similarity** *and* **semantic (result-set) equivalence*  
-* Up to **three** self-refinement attempts with structured feedback  
-* Automatic **ablation study** (`full`, `no-feedback`, `no-semantic`) – bar chart saved as `ablation.png`  
-* Clean JSON outputs, feedback logs, and optional COT retention  
+- Difficulty-aware prompts (simple / moderate / complex)  
+- Dual grading – **string similarity** *and* **semantic (result-set) equivalence**  
+- Up to **three** self-refinement attempts with structured feedback  
+- Automatic **ablation study** (`full`, `no-feedback`, `no-semantic`) — visualized in `ablation.png`  
+- Clean JSON outputs, feedback logs, and optional Chain-of-Thought (CoT) tracking  
 
 ---
 
-## 1  Installation
+## 1. Installation
 
 ```bash
-# Common utilities (Python 3.9+ recommended)
-python -m pip install pandas tqdm sqlparse rapidfuzz matplotlib
+# Common dependencies (Python 3.9+ recommended)
+pip install pandas tqdm sqlparse rapidfuzz matplotlib
 
-# ——— Local Llama workflow ———
-python -m pip install "torch>=2.1" "transformers>=4.52.3" peft bitsandbytes
+# For LLaMA-based fine-tuning
+pip install torch transformers peft bitsandbytes
 
-# ——— OpenAI workflow ———
-python -m pip install openai backoff
-
-
-## 2 Dataset & Folder Layout
+# For OpenAI API
+pip install openai backoff
+2. Dataset & Folder Structure
+php-template
+Copy
+Edit
 repo/
 ├── data/
 │   ├── train.json
@@ -43,9 +42,10 @@ repo/
 │       └── <db_id>/<db_id>.sqlite
 ├── llama_quality_check.py
 └── updated_gpt_request.py
-
-# JSON record (example)
-
+Example data format
+json
+Copy
+Edit
 {
   "db_id": "concert_singer",
   "question": "How many singers are from USA?",
@@ -53,8 +53,14 @@ repo/
   "evidence": "nation column stores the country",
   "difficulty": "simple"
 }
-## 3 llama_quality_check.py — Open-weights pipeline
-#3.1 Command-line quick-start
+SQLite file must be located at:
+data/databases/<db_id>/<db_id>.sqlite
+
+3. llama_quality_check.py — Open-weights pipeline
+3.1 Run (LoRA fine-tuning or inference)
+bash
+Copy
+Edit
 python llama_quality_check.py \
   --do_train \
   --train_path   data/train.json \
@@ -64,28 +70,31 @@ python llama_quality_check.py \
   --output_dir   checkpoints/llama_ft \
   --batch_size   2 \
   --run_ablation
-#3.2 Key arguments
-Flag	Default	Meaning
---do_train / --do_eval	None	Enable training or inference only
---engine	Llama-2-7b	Any HF causal-LM checkpoint
---lora_rank	16	LoRA rank for fine-tuning
---norm_threshold	0.75	Min. similarity (0–1) that triggers semantic checks
---run_ablation	off	Save ablation.png comparing pipeline variants
---max_length	2048	Truncate prompt + generation to this many tokens
---exec_timeout	20 s	Seconds before SQLite execution is killed
+3.2 Key arguments
+Flag	Default	Description
+--do_train / --do_eval	None	Enables training or inference mode
+--engine	LLaMA-2-7b	Any HF causal LM model
+--lora_rank	16	LoRA rank used during PEFT
+--norm_threshold	0.75	Similarity threshold to trigger semantic validation
+--run_ablation	off	Enables plotting of performance breakdown (ablation.png)
+--max_length	2048	Max input/output token length
+--exec_timeout	20	SQLite timeout (in seconds) for semantic execution validation
 
-#3.3 Outputs
-preds.json – generated SQL per question
+3.3 Outputs
+preds.json — Generated SQL per question
 
-ablation.png – bar chart of mean similarity for three variants
+ablation.png — Mean similarity (bar chart) across pipeline variants
 
-loft_logs/ – structured logs for each refinement attempt
+loft_logs/ — Attempt-by-attempt logs (per query)
 
-checkpoints/llama_ft/ – PEFT model & tokenizer (if --do_train)
+checkpoints/llama_ft/ — Saved LoRA weights and tokenizer
 
-## 4 updated_gpt_request.py — OpenAI pipeline
-#4.1 Command-line quick-start
-export OPENAI_API_KEY="sk-···"
+4. updated_gpt_request.py — OpenAI API pipeline
+4.1 Run (zero/few-shot with GPT-3.5/4/4o)
+bash
+Copy
+Edit
+export OPENAI_API_KEY="sk-..."
 
 python updated_gpt_request.py \
   --eval_path     data/dev.json \
@@ -94,52 +103,65 @@ python updated_gpt_request.py \
   --data_output_path preds/predict_dev.json \
   --use_knowledge True \
   --chain_of_thought True
+4.2 Key arguments
+Flag	Description
+--mode	Choose dev or test split
+--engine	Model name (e.g. gpt-4, gpt-4o-mini, gpt-3.5-turbo-instruct)
+--use_knowledge	Appends evidence field to prompt
+--chain_of_thought	Adds “Let’s think step-by-step.” + stores intermediate thoughts
+--max_attempts	Retry attempts per example (default: 3)
+--backoff_seconds	Start value for exponential backoff if rate-limited
+--resultset_tolerance	Allows small row/value mismatches for semantic comparison
 
-#4.2 Important arguments
+4.3 Outputs
+predict_<split>(_cot).json — Best SQL (plus CoT if enabled)
 
---mode (dev / test)	Select split processed
---engine	Any Chat/Completion model (e.g. gpt-4o-mini)
---use_knowledge	Append evidence to the prompt
---chain_of_thought	Add “Let’s think step-by-step” and keep COT in JSON
---max_attempts	Number of refinement rounds (default = 3)
---backoff_seconds	Start value for exponential back-off on rate-limit
---resultset_tolerance	Allowed row-order / float diff for semantic match
+feedback_results.txt — Detailed logs for all attempts
 
-#4.3 Outputs
-predict_<split>([_cot]).json – best SQL per question (+ COT if kept)
+rate_limit.log — Retry logs in case of OpenAI 429/5xx
 
-feedback_results.txt – human-readable trace of each attempt
+5. Choosing the Right Script
+Use case	Script	Why
+On-premises fine-tuning with full control	llama_quality_check.py	No external API, supports LoRA-based instruction tuning
+Cloud-based inference with strong models	updated_gpt_request.py	Fast setup, great zero-shot performance with GPT-4 / GPT-4o
 
-rate_limit.log – timestamps of any 429 or 5xx retries
+6. Troubleshooting
+CUDA/torch device mismatch → Patched inside LLaMA script
 
-## 5 Choosing the right script
-Keep data on-prem, fine-tune open model	llama_quality_check.py	LoRA + 8-bit, no external API calls
-Rapid results, no GPU, frontier model quality	updated_gpt_request.py	Minimal dependencies, GPT-4(/4o) accuracy
+OpenAI rate limits → Auto-retries with exponential backoff
 
-## 6 Troubleshooting
-CUDA / torch.bmm device mix – the Llama script monkey-patches common HF quirks.
+Long prompt or OOM → Try lowering --max_length, remove --use_knowledge
 
-OpenAI rate limits – automatic exponential back-off; tune --backoff_seconds.
+Database not found → Must follow: data/databases/<db_id>/<db_id>.sqlite
 
-Long prompts / OOM – lower --max_length or omit --use_knowledge.
+7. Contributing
+Fork ➜ new branch ➜ PR
 
-Incorrect DB path – check that data/databases/<db_id>/<db_id>.sqlite exists.
+Run pre-commit run --all-files (runs black, isort, etc.)
 
-## 7 Contributing
-Fork ➜ new branch ➜ PR.
-
-Run pre-commit run --all-files (black + isort).
-
-For new models, add a sub-parser entry in the wrapper quality_check.py.
+Want a new backend? Add subcommand via the wrapper in quality_check.py
 
 📄 License
 Released under the MIT License.
-See LICENSE for details.
+See LICENSE for full terms.
 
 ✏️ Citation
-S. Sarker et al., “Enhancing LLM Fine-Tuning for Text-to-SQL by SQL Quality
-Measurement,” manuscript under review, 2025.
-Happy querying 🎉
-
+pgsql
 Copy
 Edit
+S. Sarker et al., “Enhancing LLM Fine-Tuning for Text-to-SQL by SQL Quality
+Measurement,” manuscript under review, 2025.
+Happy querying! 🎉
+
+vbnet
+Copy
+Edit
+
+This version is copy-paste ready into your single `README.md` file. All headers will compile, navigation will work in GitHub, and nothing is broken or fragmented. Let me know if you'd like badges (e.g. model, license, Python version) or rendered screenshots added.
+
+
+
+
+
+
+
