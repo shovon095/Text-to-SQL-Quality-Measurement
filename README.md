@@ -1,5 +1,20 @@
 # Enhancing LLM Fine-tuning for Text-to-SQLs by SQL Quality Measurement
 
+## Pipeline Overview
+
+```mermaid
+flowchart TD
+  %% Nodes
+  Q["Natural-language<br>question"] -->|HDSP prompt| L[LLM]
+  subgraph Quality["SQL-Quality Evaluation"]
+    L --> S["SQL candidate ①"]
+    S --> E["Execute on DB"]
+    E -->|✔ Correct| OUT["Return SQL"]
+    E -->|✖ Low score| FB["Difficulty feedback"]
+    FB --> P["Prompt refiner"]
+    P --> L
+  end
+
 > **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
 
 | Script                    | Model family                           | Typical scenario                                       |
@@ -37,13 +52,13 @@ pip install openai backoff
 ## 2. Dataset & Folder Structure
 
 ```
-repo/
+text2sql-quality-refiner/
 ├── data/
 │   ├── train.json
 │   ├── dev.json
 │   └── databases/
 │       └── <db_id>/<db_id>.sqlite
-├──src/
+├── src/
 │   ├── llama_quality_check.py
 │   └── updated_gpt_request.py
 
