@@ -43,8 +43,10 @@ repo/
 │   ├── dev.json
 │   └── databases/
 │       └── <db_id>/<db_id>.sqlite
-├── llama_quality_check.py
-└── updated_gpt_request.py
+├──src/
+│   ├── llama_quality_check.py
+│   └── updated_gpt_request.py
+
 ```
 
 ### Example JSON Record
