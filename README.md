@@ -1,4 +1,4 @@
-# Text-to-SQL Quality-Measurement
+# Enhancing LLM Fine-tuning for Text-to-SQLs by SQL Quality Measurement
 
 > **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
 
