@@ -2,18 +2,24 @@
 
 ## Pipeline Overview
 
+## Pipeline Overview
+
 ```mermaid
 flowchart TD
-  %% Nodes
-  Q["Natural-language<br>question"] -->|HDSP prompt| L[LLM]
-  subgraph Quality["SQL-Quality Evaluation"]
-    L --> S["SQL candidate ①"]
-    S --> E["Execute on DB"]
-    E -->|✔ Correct| OUT["Return SQL"]
-    E -->|✖ Low score| FB["Difficulty feedback"]
-    FB --> P["Prompt refiner"]
-    P --> L
+  UQ["User Query"] --> P["Human-Designed<br>Step-by-Step Prompt"]
+  P --> LLM["LLM (GPT, LLaMA, etc.)"]
+  LLM --> SQL["Generated SQL"]
+  
+  subgraph QualityEval["SQL Quality Measurement"]
+    SQL --> Norm["Normalized Comparison"]
+    SQL --> Sem["Semantic (Execution) Comparison"]
+    Norm --> FDBK["Generate Difficulty Feedback"]
+    Sem --> FDBK
   end
+
+  FDBK -->|If Low Quality| P
+  Sem -->|If Semantically Valid| FinalSQL["Final SQL ✔"]
+
 
 > **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
 
