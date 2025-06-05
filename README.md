@@ -238,16 +238,3 @@ python updated_gpt_request.py \
 
 ---
 
-## ✏️ Citation
-
-```
-@misc{sarker2024enhancingllmfinetuningtexttosqls,
-      title={Enhancing LLM Fine-tuning for Text-to-SQLs by SQL Quality Measurement}, 
-      author={Shouvon Sarker and Xishuang Dong and Xiangfang Li and Lijun Qian},
-      year={2024},
-      eprint={2410.01869},
-      archivePrefix={arXiv},
-      primaryClass={cs.DB},
-      url={https://arxiv.org/abs/2410.01869}, 
-}
-```
