@@ -57,7 +57,7 @@ Prompt refinement is triggered if:
 
 ---
 
-### 🚀 Extended Prompt (on Feedback)
+### Extended Prompt (on Feedback)
 
 If triggered, 5 additional refinement steps are inserted between steps 5–6:
 
