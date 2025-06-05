@@ -3,6 +3,72 @@
 ## Pipeline Overview
 
 ![Pipeline Overview](./images/feedback.png)
+
+## Step-by-Step Prompting & SQL Quality Feedback
+
+The proposed method enhances Text-to-SQL generation using:
+
+- **Human-designed step-by-step prompts**
+- **SQL quality feedback loops**
+
+---
+
+###  A. Step-by-Step Prompts
+
+LLMs follow 8 guided steps to build accurate SQL:
+
+1. **Understand schema**: Identify relevant tables and columns.
+2. **Plan joins**: Determine relationships and required joins.
+3. **Select columns**: Choose the information to retrieve.
+4. **Apply filters**: Add conditions using `WHERE` clauses.
+5. **Check for aggregation**: Use `GROUP BY`, `HAVING` if needed.
+6. **Sort results**: Apply `ORDER BY` or `LIMIT`.
+7. **Optimize structure**: Consider subqueries or `WITH` clauses.
+8. **Compose SQL**: Integrate all steps into the final query.
+
+---
+
+### B. SQL Quality Measurement
+
+SQL quality is evaluated with two key methods:
+
+#### 1. Normalized Comparison
+
+- Compares generated SQL with ground truth using Levenshtein distance.
+- Measures syntactic similarity after normalization.
+
+#### 2. Semantic Comparison
+
+- Checks if the **type** of result from the generated SQL matches that from ChatGPT's direct answer.
+
+#### 3. Difficulty Feedback
+
+Based on syntax similarity (`fnc`) and number of columns (`Ncol`):
+
+- `0`: Simple
+- `1`: Moderate
+- `2`: Difficult
+
+#### 4. Feedback Trigger
+
+Prompt refinement is triggered if:
+- SQL fails semantically (`fsc = 0`)
+- Or normalized score is low and query is moderate/difficult
+
+---
+
+### 🚀 Extended Prompt (on Feedback)
+
+If triggered, 5 additional refinement steps are inserted between steps 5–6:
+
+1. **Complex joins & subqueries**
+2. **Data transformations & calculations**
+3. **Performance optimization**
+4. **Security and data integrity**
+5. **Review and test the query**
+
+These help LLMs handle harder SQLs and avoid execution errors.
+
 ---
 
 > **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
