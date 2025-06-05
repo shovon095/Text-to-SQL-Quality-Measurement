@@ -1,4 +1,12 @@
 # Enhancing LLM Fine-tuning for Text-to-SQLs by SQL Quality Measurement
+> **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
+
+| Script                    | Model family                           | Typical scenario                                       |
+|---------------------------|----------------------------------------|--------------------------------------------------------|
+| `llama_quality_check.py`  | **Open-weights LLaMA-2 / HF causal-LM**| On-prem GPU fine-tuning with LoRA + 8-bit quantization |
+| `updated_gpt_request.py`  | **OpenAI GPT-3.5 / GPT-4 / GPT-4o**    | Rapid prototyping via OpenAI API (no GPU required)     |
+
+---
 
 ## Pipeline Overview
 
@@ -57,7 +65,7 @@ Prompt refinement is triggered if:
 
 ---
 
-### Extended Prompt (on Feedback)
+### D. Extended Prompt (on Feedback)
 
 If triggered, 5 additional refinement steps are inserted between steps 5–6:
 
@@ -68,15 +76,6 @@ If triggered, 5 additional refinement steps are inserted between steps 5–6:
 5. **Review and test the query**
 
 These help LLMs handle harder SQLs and avoid execution errors.
-
----
-
-> **Two complementary pipelines** for converting natural-language questions to SQL, grading the output (string **and** semantic similarity), and self-refining the query until a quality threshold is reached.
-
-| Script                    | Model family                           | Typical scenario                                       |
-|---------------------------|----------------------------------------|--------------------------------------------------------|
-| `llama_quality_check.py`  | **Open-weights LLaMA-2 / HF causal-LM**| On-prem GPU fine-tuning with LoRA + 8-bit quantization |
-| `updated_gpt_request.py`  | **OpenAI GPT-3.5 / GPT-4 / GPT-4o**    | Rapid prototyping via OpenAI API (no GPU required)     |
 
 ---
 
