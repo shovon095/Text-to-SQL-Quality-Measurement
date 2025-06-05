@@ -105,6 +105,8 @@ pip install openai backoff
 ---
 
 ## 2. Dataset & Folder Structure
+### Please download the BIRD dataset from- https://bird-bench.github.io/
+---
 
 ```
 text2sql-quality-refiner/
